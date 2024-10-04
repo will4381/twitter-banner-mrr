@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive MRR Banner with Spacing Controls</title>
+    <!-- Include DM Sans font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Include html2canvas library for capturing the banner -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Root variables for colors and spacing */
+        :root {
+            --background-color: #1a1a1a;          /* Default Background Color */
+            --text-color: #ffffff;                /* Text Color */
+            --highlight-color: #ffd700;           /* Default Highlight Color (Gold) */
+
+            /* Spacing Variables */
+            --project-item-margin: 10px;          /* Margin between project items */
+            --emoji-font-size: 28px;              /* Emoji font size */
+            --project-font-size: 20px;            /* Project font size */
+            --emoji-margin-right: 15px;           /* Margin-right of emoji */
+            --separator-width: 2px;               /* Width of separator line */
+            --separator-blur: 0px;                /* Blur of separator line */
+            --left-section-width: 60%;            /* Width of left section */
+            --left-section-padding: 20px;         /* Padding for left section */
+            --right-section-padding: 0px;         /* Padding for right section */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-color);
+            background-color: #f0f0f0; /* Light background for the page */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Container for the banner */
+        .banner-container {
+            position: relative;
+            width: 1500px;
+            height: 500px;
+            background-color: var(--background-color);
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+        }
+
+        /* Left section */
+        .left-section {
+            width: var(--left-section-width);
+            padding: var(--left-section-padding);
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+        }
+
+        /* Right section */
+        .right-section {
+            width: calc(100% - var(--left-section-width));
+            padding: var(--right-section-padding);
+            position: relative;
+        }
+
+        /* Separator line */
+        .separator {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: var(--left-section-width);
+            width: var(--separator-width);
+            background-color: var(--highlight-color);
+            filter: blur(var(--separator-blur));
+            z-index: 2;
+            display: block; /* Will be toggled via JavaScript */
+        }
+
+        /* Uploaded image */
+        .uploaded-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Banner content */
+        .project-item {
+            width: 45%; /* For 2 columns */
+            margin: var(--project-item-margin) 2.5%; /* Adjusted margin for 2 columns */
+            display: flex;
+            align-items: center;
+            font-size: var(--project-font-size);
+            color: var(--text-color);
+        }
+
+        .emoji {
+            font-size: var(--emoji-font-size);
+            margin-right: var(--emoji-margin-right);
+        }
+
+        .project-details {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start; /* Left-align content */
+        }
+
+        .project-name {
+            font-weight: 700;
+            color: var(--highlight-color);
+            margin-bottom: 5px;
+        }
+
+        .mrr-value {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .change-indicator {
+            font-weight: 400;
+            font-size: 18px;
+            color: var(--text-color);
+        }
+
+        .change-description {
+            font-size: 14px;
+            color: var(--text-color);
+            margin-top: -5px;
+        }
+
+        /* Style for the controls */
+        .controls-container {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .controls-container h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            color: black;
+        }
+
+        .control-group label {
+            width: 150px;
+            font-weight: 500;
+        }
+
+        .control-group input[type="text"],
+        .control-group input[type="number"],
+        .control-group input[type="checkbox"] {
+            flex: 1;
+            padding: 8px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .control-buttons {
+            text-align: right;
+        }
+
+        .control-buttons button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        /* File input styling */
+        .file-input {
+            margin-top: 10px;
+            color: black;
+        }
+
+        /* Spacing Slider Styles */
+        .spacing-controls {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+
+        .spacing-controls h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .spacing-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: black;
+        }
+
+        .spacing-group label {
+            width: 200px;
+            font-weight: 500;
+        }
+
+        .spacing-group input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .spacing-value {
+            width: 50px;
+            text-align: right;
+        }
+
+        /* Color Picker Styles */
+        .color-picker-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .color-picker {
+            margin: 10px;
+            color: black;
+        }
+
+        .color-picker label {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+
+        .color-picker input[type="color"] {
+            border: none;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .banner-container {
+                width: 100%;
+                height: auto;
+                flex-direction: column;
+                padding: 20px 0;
+            }
+
+            .left-section, .right-section {
+                width: 100%;
+            }
+
+            .separator {
+                display: none;
+            }
+
+            .project-item {
+                width: 100%;
+                margin: 10px 0;
+            }
+
+            .controls-container,
+            .spacing-controls {
+                width: 100%;
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Controls to Add/Remove Businesses -->
+    <div class="controls-container">
+        <h2>Manage Your Businesses</h2>
+        <div class="control-group">
+            <label for="emojiInput">Emoji:</label>
+            <input type="text" id="emojiInput" placeholder="e.g., 🚀" maxlength="2">
+        </div>
+        <div class="control-group">
+            <label for="nameInput">Project Name:</label>
+            <input type="text" id="nameInput" placeholder="e.g., Project Alpha">
+        </div>
+        <div class="control-group">
+            <label for="mrrInput">MRR:</label>
+            <input type="number" id="mrrInput" placeholder="e.g., 5000">
+        </div>
+        <div class="control-group">
+            <label for="changeInput">Change %:</label>
+            <input type="number" id="changeInput" placeholder="e.g., 5">
+        </div>
+        <div class="control-buttons">
+            <button id="addBusinessBtn">Add Business</button>
+            <button id="removeBusinessBtn">Remove Last</button>
+        </div>
+        <!-- File input for image upload -->
+        <div class="file-input">
+            <label for="imageUpload">Upload Image (Right Section):</label>
+            <input type="file" id="imageUpload" accept="image/*">
+        </div>
+    </div>
+
+    <!-- Spacing Controls -->
+    <div class="spacing-controls">
+        <h2>Adjust Spacing</h2>
+        <!-- Separator Controls -->
+        <div class="spacing-group">
+            <label for="showSeparator">Show Separator:</label>
+            <input type="checkbox" id="showSeparator" checked>
+        </div>
+        <div class="spacing-group">
+            <label for="separatorWidth">Separator Width:</label>
+            <input type="range" id="separatorWidth" min="1" max="10" value="2">
+            <div class="spacing-value" id="separatorWidthValue">2px</div>
+        </div>
+        <div class="spacing-group">
+            <label for="separatorBlur">Separator Blur:</label>
+            <input type="range" id="separatorBlur" min="0" max="10" value="0">
+            <div class="spacing-value" id="separatorBlurValue">0px</div>
+        </div>
+        <!-- Column Padding Controls -->
+        <div class="spacing-group">
+            <label for="leftSectionPadding">Left Section Padding:</label>
+            <input type="range" id="leftSectionPadding" min="0" max="50" value="20">
+            <div class="spacing-value" id="leftSectionPaddingValue">20px</div>
+        </div>
+        <div class="spacing-group">
+            <label for="rightSectionPadding">Right Section Padding:</label>
+            <input type="range" id="rightSectionPadding" min="0" max="50" value="0">
+            <div class="spacing-value" id="rightSectionPaddingValue">0px</div>
+        </div>
+        <!-- Left Section Width Control -->
+        <div class="spacing-group">
+            <label for="leftSectionWidth">Left Section Width:</label>
+            <input type="range" id="leftSectionWidth" min="30" max="70" value="60">
+            <div class="spacing-value" id="leftSectionWidthValue">60%</div>
+        </div>
+        <!-- Other Spacing Controls -->
+        <div class="spacing-group">
+            <label for="projectItemMargin">Project Item Margin:</label>
+            <input type="range" id="projectItemMargin" min="0" max="30" value="10">
+            <div class="spacing-value" id="projectItemMarginValue">10px</div>
+        </div>
+        <div class="spacing-group">
+            <label for="emojiFontSize">Emoji Size:</label>
+            <input type="range" id="emojiFontSize" min="16" max="64" value="28">
+            <div class="spacing-value" id="emojiFontSizeValue">28px</div>
+        </div>
+        <div class="spacing-group">
+            <label for="projectFontSize">Project Font Size:</label>
+            <input type="range" id="projectFontSize" min="12" max="36" value="20">
+            <div class="spacing-value" id="projectFontSizeValue">20px</div>
+        </div>
+        <div class="spacing-group">
+            <label for="emojiMarginRight">Emoji Margin Right:</label>
+            <input type="range" id="emojiMarginRight" min="0" max="30" value="15">
+            <div class="spacing-value" id="emojiMarginRightValue">15px</div>
+        </div>
+    </div>
+
+    <!-- Color Pickers -->
+    <div class="color-picker-container">
+        <div class="color-picker">
+            <label for="backgroundColor">Background Color:</label>
+            <input type="color" id="backgroundColor" name="backgroundColor" value="#1a1a1a">
+        </div>
+        <div class="color-picker">
+            <label for="highlightColor">Highlight Color:</label>
+            <input type="color" id="highlightColor" name="highlightColor" value="#ffd700">
+        </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="banner-container" id="banner">
+        <!-- Separator Line -->
+        <div class="separator" id="separator"></div>
+
+        <!-- Left Section -->
+        <div class="left-section" id="bannerContent">
+            <!-- Projects will be dynamically added here -->
+        </div>
+
+        <!-- Right Section -->
+        <div class="right-section">
+            <img src="" alt="Uploaded Image" class="uploaded-image" id="uploadedImage">
+        </div>
+    </div>
+
+    <!-- Download Button -->
+    <div class="download-container" style="text-align: center; margin-top: 20px;">
+        <button id="downloadBannerBtn">Download Banner</button>
+    </div>
+
+    <!-- JavaScript for Dynamic Functionality -->
+    <script>
+        // Get references to the color pickers
+        const backgroundColorPicker = document.getElementById('backgroundColor');
+        const highlightColorPicker = document.getElementById('highlightColor');
+
+        // Update the banner colors when the color pickers change
+        backgroundColorPicker.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--background-color', this.value);
+        });
+
+        highlightColorPicker.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--highlight-color', this.value);
+        });
+
+        // References to controls
+        const emojiInput = document.getElementById('emojiInput');
+        const nameInput = document.getElementById('nameInput');
+        const mrrInput = document.getElementById('mrrInput');
+        const changeInput = document.getElementById('changeInput');
+        const addBusinessBtn = document.getElementById('addBusinessBtn');
+        const removeBusinessBtn = document.getElementById('removeBusinessBtn');
+        const bannerContent = document.getElementById('bannerContent');
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadedImage = document.getElementById('uploadedImage');
+
+        // Spacing controls references
+        const projectItemMarginSlider = document.getElementById('projectItemMargin');
+        const emojiFontSizeSlider = document.getElementById('emojiFontSize');
+        const projectFontSizeSlider = document.getElementById('projectFontSize');
+        const emojiMarginRightSlider = document.getElementById('emojiMarginRight');
+        const separatorWidthSlider = document.getElementById('separatorWidth');
+        const separatorBlurSlider = document.getElementById('separatorBlur');
+        const leftSectionPaddingSlider = document.getElementById('leftSectionPadding');
+        const rightSectionPaddingSlider = document.getElementById('rightSectionPadding');
+        const leftSectionWidthSlider = document.getElementById('leftSectionWidth');
+        const showSeparatorCheckbox = document.getElementById('showSeparator');
+        const separatorElement = document.getElementById('separator');
+
+        // Spacing values display
+        const projectItemMarginValue = document.getElementById('projectItemMarginValue');
+        const emojiFontSizeValue = document.getElementById('emojiFontSizeValue');
+        const projectFontSizeValue = document.getElementById('projectFontSizeValue');
+        const emojiMarginRightValue = document.getElementById('emojiMarginRightValue');
+        const separatorWidthValue = document.getElementById('separatorWidthValue');
+        const separatorBlurValue = document.getElementById('separatorBlurValue');
+        const leftSectionPaddingValue = document.getElementById('leftSectionPaddingValue');
+        const rightSectionPaddingValue = document.getElementById('rightSectionPaddingValue');
+        const leftSectionWidthValue = document.getElementById('leftSectionWidthValue');
+
+        // Update spacing when sliders change
+        projectItemMarginSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--project-item-margin', this.value + 'px');
+            projectItemMarginValue.textContent = this.value + 'px';
+        });
+
+        emojiFontSizeSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--emoji-font-size', this.value + 'px');
+            emojiFontSizeValue.textContent = this.value + 'px';
+        });
+
+        projectFontSizeSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--project-font-size', this.value + 'px');
+            projectFontSizeValue.textContent = this.value + 'px';
+        });
+
+        emojiMarginRightSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--emoji-margin-right', this.value + 'px');
+            emojiMarginRightValue.textContent = this.value + 'px';
+        });
+
+        separatorWidthSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--separator-width', this.value + 'px');
+            separatorWidthValue.textContent = this.value + 'px';
+        });
+
+        separatorBlurSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--separator-blur', this.value + 'px');
+            separatorBlurValue.textContent = this.value + 'px';
+        });
+
+        leftSectionPaddingSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--left-section-padding', this.value + 'px');
+            leftSectionPaddingValue.textContent = this.value + 'px';
+        });
+
+        rightSectionPaddingSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--right-section-padding', this.value + 'px');
+            rightSectionPaddingValue.textContent = this.value + 'px';
+        });
+
+        leftSectionWidthSlider.addEventListener('input', function() {
+            document.documentElement.style.setProperty('--left-section-width', this.value + '%');
+            leftSectionWidthValue.textContent = this.value + '%';
+        });
+
+        showSeparatorCheckbox.addEventListener('change', function() {
+            separatorElement.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Initialize an array to store business data
+        let businesses = [];
+
+        // Function to render the banner content
+        function renderBanner() {
+            bannerContent.innerHTML = ''; // Clear existing content
+
+            // Maximum of 6 businesses
+            const maxBusinesses = 6;
+            if (businesses.length > maxBusinesses) {
+                businesses = businesses.slice(0, maxBusinesses);
+            }
+
+            businesses.forEach(business => {
+                // Create project item
+                const projectItem = document.createElement('div');
+                projectItem.classList.add('project-item');
+
+                // Create and append elements
+                const emojiDiv = document.createElement('div');
+                emojiDiv.classList.add('emoji');
+                emojiDiv.textContent = business.emoji || '🏷️';
+
+                const projectDetailsDiv = document.createElement('div');
+                projectDetailsDiv.classList.add('project-details');
+
+                const nameDiv = document.createElement('div');
+                nameDiv.classList.add('project-name');
+                nameDiv.textContent = business.name || 'Unnamed Project';
+
+                const mrrDiv = document.createElement('div');
+                mrrDiv.classList.add('mrr-value');
+                mrrDiv.textContent = `$${business.mrr.toLocaleString()} MRR`;
+
+                const changeDiv = document.createElement('div');
+                changeDiv.classList.add('change-indicator');
+                const sign = business.change >= 0 ? '+' : '−';
+                changeDiv.textContent = `${sign}${Math.abs(business.change)}%`;
+
+                const changeDescDiv = document.createElement('div');
+                changeDescDiv.classList.add('change-description');
+                changeDescDiv.textContent = 'Over last month';
+
+                // Append to project details
+                projectDetailsDiv.appendChild(nameDiv);
+                projectDetailsDiv.appendChild(mrrDiv);
+                projectDetailsDiv.appendChild(changeDiv);
+                projectDetailsDiv.appendChild(changeDescDiv);
+
+                // Append to project item
+                projectItem.appendChild(emojiDiv);
+                projectItem.appendChild(projectDetailsDiv);
+
+                // Append to banner content
+                bannerContent.appendChild(projectItem);
+            });
+        }
+
+        // Event listener for adding a business
+        addBusinessBtn.addEventListener('click', function() {
+            if (businesses.length >= 6) {
+                alert('Maximum of 6 businesses allowed.');
+                return;
+            }
+
+            const emoji = emojiInput.value.trim() || '🏷️';
+            const name = nameInput.value.trim() || 'Unnamed Project';
+            const mrr = parseFloat(mrrInput.value) || 0;
+            const change = parseFloat(changeInput.value) || 0;
+
+            businesses.push({ emoji, name, mrr, change });
+            renderBanner();
+
+            // Clear input fields
+            emojiInput.value = '';
+            nameInput.value = '';
+            mrrInput.value = '';
+            changeInput.value = '';
+        });
+
+        // Event listener for removing the last business
+        removeBusinessBtn.addEventListener('click', function() {
+            if (businesses.length > 0) {
+                businesses.pop();
+                renderBanner();
+            }
+        });
+
+        // Event listener for image upload
+        imageUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Please upload a valid image file.');
+            }
+        });
+
+        // Initial render with sample data
+        businesses = [
+            { emoji: '🚀', name: 'Project Alpha', mrr: 5000, change: 5 },
+            { emoji: '📱', name: 'Project Beta', mrr: 3200, change: -2 },
+            { emoji: '🌐', name: 'Project Gamma', mrr: 7800, change: 10 },
+            { emoji: '💡', name: 'Project Delta', mrr: 2500, change: -1 },
+            { emoji: '🎮', name: 'Project Epsilon', mrr: 6300, change: 3 },
+            { emoji: '📚', name: 'Project Zeta', mrr: 4100, change: -4 }
+        ];
+        renderBanner();
+
+        // Download Banner Functionality
+        const downloadBannerBtn = document.getElementById('downloadBannerBtn');
+
+        downloadBannerBtn.addEventListener('click', function() {
+            // Use html2canvas to capture the banner
+            html2canvas(document.getElementById('banner'), { width: 1500, height: 500 }).then(function(canvas) {
+                // Create a link to download the image
+                const link = document.createElement('a');
+                link.download = 'banner.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+    </script>
+</body>
+</html>
