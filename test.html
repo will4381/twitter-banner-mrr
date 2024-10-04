@@ -16,14 +16,14 @@
 
             /* Spacing Variables */
             --project-item-margin: 10px;          /* Margin between project items */
-            --emoji-font-size: 28px;              /* Emoji font size */
-            --project-font-size: 20px;            /* Project font size */
-            --emoji-margin-right: 15px;           /* Margin-right of emoji */
-            --separator-width: 2px;               /* Width of separator line */
+            --emoji-font-size: 40px;              /* Emoji font size */
+            --project-font-size: 30px;            /* Project font size */
+            --emoji-margin-right: 20px;           /* Margin-right of emoji */
+            --separator-width: 8px;               /* Width of separator line */
             --separator-blur: 0px;                /* Blur of separator line */
-            --left-section-width: 60%;            /* Width of left section */
-            --left-section-padding: 20px;         /* Padding for left section */
-            --right-section-padding: 0px;         /* Padding for right section */
+            --left-section-width: 40%;            /* Width of left section (adjusted) */
+            --left-section-padding: 0px;          /* Padding for left section (adjusted) */
+            --right-section-padding: 35px;        /* Padding for right section (adjusted) */
         }
 
         body {
@@ -49,21 +49,22 @@
             display: flex;
         }
 
-        /* Left section */
+        /* Left section (Image now) */
         .left-section {
             width: var(--left-section-width);
             padding: var(--left-section-padding);
             box-sizing: border-box;
-            display: flex;
-            flex-wrap: wrap;
-            align-content: flex-start;
+            position: relative;
         }
 
-        /* Right section */
+        /* Right section (MRR stuff now) */
         .right-section {
             width: calc(100% - var(--left-section-width));
             padding: var(--right-section-padding);
-            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            box-sizing: border-box;
         }
 
         /* Separator line */
@@ -293,7 +294,7 @@
         </div>
         <!-- File input for image upload -->
         <div class="file-input">
-            <label for="imageUpload">Upload Image (Right Section):</label>
+            <label for="imageUpload">Upload Image (Left Section):</label>
             <input type="file" id="imageUpload" accept="image/*">
         </div>
     </div>
@@ -319,19 +320,19 @@
         <!-- Column Padding Controls -->
         <div class="spacing-group">
             <label for="leftSectionPadding">Left Section Padding:</label>
-            <input type="range" id="leftSectionPadding" min="0" max="50" value="20">
-            <div class="spacing-value" id="leftSectionPaddingValue">20px</div>
+            <input type="range" id="leftSectionPadding" min="0" max="50" value="0">
+            <div class="spacing-value" id="leftSectionPaddingValue">0px</div>
         </div>
         <div class="spacing-group">
             <label for="rightSectionPadding">Right Section Padding:</label>
-            <input type="range" id="rightSectionPadding" min="0" max="50" value="0">
-            <div class="spacing-value" id="rightSectionPaddingValue">0px</div>
+            <input type="range" id="rightSectionPadding" min="0" max="50" value="20">
+            <div class="spacing-value" id="rightSectionPaddingValue">20px</div>
         </div>
         <!-- Left Section Width Control -->
         <div class="spacing-group">
             <label for="leftSectionWidth">Left Section Width:</label>
-            <input type="range" id="leftSectionWidth" min="30" max="70" value="60">
-            <div class="spacing-value" id="leftSectionWidthValue">60%</div>
+            <input type="range" id="leftSectionWidth" min="30" max="70" value="40">
+            <div class="spacing-value" id="leftSectionWidthValue">40%</div>
         </div>
         <!-- Other Spacing Controls -->
         <div class="spacing-group">
@@ -373,14 +374,14 @@
         <!-- Separator Line -->
         <div class="separator" id="separator"></div>
 
-        <!-- Left Section -->
-        <div class="left-section" id="bannerContent">
-            <!-- Projects will be dynamically added here -->
+        <!-- Left Section (Image) -->
+        <div class="left-section">
+            <img src="" alt="Uploaded Image" class="uploaded-image" id="uploadedImage">
         </div>
 
-        <!-- Right Section -->
-        <div class="right-section">
-            <img src="" alt="Uploaded Image" class="uploaded-image" id="uploadedImage">
+        <!-- Right Section (MRR Stuff) -->
+        <div class="right-section" id="bannerContent">
+            <!-- Projects will be dynamically added here -->
         </div>
     </div>
 
